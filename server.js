@@ -1,3 +1,4 @@
+/* jshint esversion: 6 */
 
 const express = require('express');
 const router = express.Router();
@@ -50,7 +51,22 @@ app.post('/shopping-list', jsonParser, (req, res) => {
 
 app.get('/recipes', (req, res) => {
   res.json(Recipes.get());
-})
+});
+
+app.post('/recipes', jsonParser, (req, res) => {
+  //make sure name and ingredients are present
+  const requiredData = ['name', 'ingredients'];
+  for (let i = 0; i < requiredData.length; i++) {
+    const data = requiredData[i];
+    if(!(data in req.body)) {
+      const errMessage = `Missing \`${data}\` in request body`;
+      console.error(errMessage);
+      return res.status(500).send(errMessage);
+    }
+  }
+  const item = Recipes.create(req.body.name, req.body.ingredients);
+  res.status(301).json(item);
+});
 
 app.listen(process.env.PORT || 8080, () => {
   console.log(`Your app is listening on port ${process.env.PORT || 8080}`);
